@@ -1,0 +1,1 @@
+# zephyr-scale-junit-integration
