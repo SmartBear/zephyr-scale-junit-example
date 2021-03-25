@@ -17,13 +17,13 @@ public class ExampleTest {
         assertEquals(4, 3);
     }
 
-    // will match with test case with key DEV-T21
+    // will match with test case with key DEV-T1
     @Test
     void DEV_T1_testNr2() {
         assertEquals(4, 4);
     }
 
-    // will match with test case with key DEV-T21
+    // will match with test case with key DEV-T2
     @Test
     void testNr3_DEV_T2() {
         fail("failing test");
