@@ -51,7 +51,7 @@ public class ExampleTest {
 
 ## Considerations
 
-Zephyr scale relies on method names provided in JUnit result file. We have detected that some Gradle versions do not include method names for parametrized tests for JUnit5. Zephyr scale will ignore such test cases. We suggest increasing Gradle version.
+Zephyr scale relies on method names provided in JUnit result file. We have detected that for Gradle version 6.7 it does not include method names for parametrized tests for JUnit5. Zephyr scale will ignore such test cases. We suggest changing Gradle version.
 
 ## Requirements to run this example project
 
