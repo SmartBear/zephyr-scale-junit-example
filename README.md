@@ -1,4 +1,4 @@
-Zephyr Scale JUnit integration
+# Zephyr Scale JUnit integration
 
 This is an example project on how to use the integration of Zephyr Scale and automated tests when using JUnit.
 
