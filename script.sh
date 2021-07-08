@@ -12,7 +12,7 @@ fi
 PROJECT_KEY=$1 # provide your project key
 TOKEN=$2 # provide your Public REST API token
 
-URL="https://api.adaptavist.io/tm4j/v2/automations/executions/junit?projectKey=${PROJECT_KEY}&autoCreateTestCases=false"
+URL="https://api.zephyrscale.smartbear.com/v2/automations/executions/junit?projectKey=${PROJECT_KEY}&autoCreateTestCases=false"
 
 mvn test
 
