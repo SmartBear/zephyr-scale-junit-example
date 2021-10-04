@@ -1,0 +1,36 @@
+version: 2.1
+orbs:
+  maven: circleci/maven@1.2.0
+
+executors:
+  openjdk:
+    docker:
+      - image: maven:3.6-jdk-8
+    resource_class: small
+
+commands:
+  checkout-and-setup:
+    steps:
+      - checkout
+
+jobs:
+  test:
+    executor: openjdk
+    steps:
+      - checkout
+      - run:
+          name: Test
+          command: mvn test
+      - store_test_results:
+          path: target/surefire-reports
+      - store_artifacts:
+          path: target/surefire-reports
+
+workflows:
+  build_test:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore:
+                - main
