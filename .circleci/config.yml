@@ -1,31 +1,20 @@
 version: 2.1
+
 orbs:
-  maven: circleci/maven@1.2.0
+  smartbear: smartbear/zephyr-scale@dev:8c8677f
 
 executors:
   openjdk:
     docker:
-      - image: maven:3.6-jdk-8
+      - image: cimg/openjdk:13.0
+        auth:
+          username: ${DOCKER_HUB_USERNAME}
+          password: ${DOCKER_HUB_PASSWORD}
     resource_class: small
 
-jobs:
-  test:
-    executor: openjdk
-    steps:
-      - checkout
-      - run:
-          name: Test
-          command: mvn test
-      - store_test_results:
-          path: target/surefire-reports
-      - store_artifacts:
-          path: target/surefire-reports
-
+commands:
   upload-test-results:
-    executor: openjdk
     parameters:
-      base-url:
-        type: string
       api-token:
         type: string
       project-key:
@@ -33,20 +22,47 @@ jobs:
       create-test-cases:
         type: boolean
       test-framework:
-          default: "junit"
-          type: enum
-          enum: ["junit", "cucumber", "custom"]
+        default: "junit"
+        type: enum
+        enum: [ "junit", "cucumber", "custom" ]
       test-results-path:
         type: string
     steps:
-      - attach_workspace:
-          at: .
       - run:
           name: Create a Zip
-          command: ls
+          command: |
+            zip results.zip target/surefire-reports/*.xml
+          when: always
+      - store_artifacts:
+          path: results.zip
       - run:
           name: Upload Zip
-          command: ls
+          command: |
+            curl --location --request POST 'https://api.zephyrscale.smartbear.com/v2/automations/executions/junit?projectKey=<< parameters.project-key >>&autoCreateTestCases=<< parameters.create-test-cases >>' \
+            --header "Content-Type: multipart/form-data" \
+            --header "Authorization: << parameters.api-token >> " \
+            --form 'file=@"results.zip"'
+          when: always
+
+jobs:
+  test:
+    executor: openjdk
+    steps:
+      - checkout
+      - smartbear/greet
+      - run:
+          name: Test
+          command: mvn test
+      - store_test_results:
+          path: target/surefire-reports
+      - store_artifacts:
+          path: target/surefire-reports
+      - upload-test-results:
+          api-token: ${ZEPHYR_SCALE_API_TOKEN}
+          project-key: "DEV"
+          create-test-cases: true
+          test-framework: "junit"
+          test-results-path: "target/surefire-reports"
 
 workflows:
   build_test:
@@ -56,10 +72,3 @@ workflows:
             branches:
               ignore:
                 - main
-      - upload-test-results:
-          base-url: "https://zs-support-smartbear.atlassian.net"
-          api-token: ${ZEPHYR_SCALE_API_TOKEN}
-          project-key: "HAC"
-          create-test-cases: true
-          test-framework: "junit"
-          test-results-path: "target/surefire-reports"
