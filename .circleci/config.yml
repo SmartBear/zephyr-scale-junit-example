@@ -8,11 +8,6 @@ executors:
       - image: maven:3.6-jdk-8
     resource_class: small
 
-commands:
-  checkout-and-setup:
-    steps:
-      - checkout
-
 jobs:
   test:
     executor: openjdk
@@ -26,6 +21,33 @@ jobs:
       - store_artifacts:
           path: target/surefire-reports
 
+  upload-test-results:
+    executor: openjdk
+    parameters:
+      base-url:
+        type: string
+      api-token:
+        type: string
+      project-key:
+        type: string
+      create-test-cases:
+        type: boolean
+      test-framework:
+          default: "junit"
+          type: enum
+          enum: ["junit", "cucumber", "custom"]
+      test-results-path:
+        type: string
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create a Zip
+          command: ls
+      - run:
+          name: Upload Zip
+          command: ls
+
 workflows:
   build_test:
     jobs:
@@ -34,3 +56,10 @@ workflows:
             branches:
               ignore:
                 - main
+      - upload-test-results:
+          base-url: "https://zs-support-smartbear.atlassian.net"
+          api-token: ${ZEPHYR_SCALE_API_TOKEN}
+          project-key: "HAC"
+          create-test-cases: true
+          test-framework: "junit"
+          test-results-path: "target/surefire-reports"
