@@ -1,0 +1,33 @@
+version: 2.1
+
+executors:
+  openjdk:
+    docker:
+      - image: openjdk:8-jdk-buster
+
+commands:
+  checkout-and-setup:
+    steps:
+      - checkout
+
+jobs:
+  test:
+    executor: openjdk
+    steps:
+      - run:
+          name: Test
+          command: mvn test
+      - checkout
+      - store_test_results:
+          path: build/test-report/
+      - store_artifacts:
+          path: build/test-report/
+
+workflows:
+  build_test:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore:
+                - main
