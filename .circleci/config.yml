@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  smartbear: smartbear/zephyr-scale@dev:8c8677f
+  smartbear: smartbear/zephyr-scale@dev:fa5e81b
 
 executors:
   openjdk:
@@ -12,44 +12,11 @@ executors:
           password: ${DOCKER_HUB_PASSWORD}
     resource_class: small
 
-commands:
-  upload-test-results:
-    parameters:
-      api-token:
-        type: string
-      project-key:
-        type: string
-      create-test-cases:
-        type: boolean
-      test-framework:
-        default: "junit"
-        type: enum
-        enum: [ "junit", "cucumber", "custom" ]
-      test-results-path:
-        type: string
-    steps:
-      - run:
-          name: Create a Zip
-          command: |
-            zip results.zip target/surefire-reports/*.xml
-          when: always
-      - store_artifacts:
-          path: results.zip
-      - run:
-          name: Upload Zip
-          command: |
-            curl --location --request POST 'https://api.zephyrscale.smartbear.com/v2/automations/executions/junit?projectKey=<< parameters.project-key >>&autoCreateTestCases=<< parameters.create-test-cases >>' \
-            --header "Content-Type: multipart/form-data" \
-            --header "Authorization: << parameters.api-token >> " \
-            --form 'file=@"results.zip"'
-          when: always
-
 jobs:
   test:
     executor: openjdk
     steps:
       - checkout
-      - smartbear/greet
       - run:
           name: Test
           command: mvn test
@@ -57,12 +24,12 @@ jobs:
           path: target/surefire-reports
       - store_artifacts:
           path: target/surefire-reports
-      - upload-test-results:
+      - smartbear/upload-test-results:
           api-token: ${ZEPHYR_SCALE_API_TOKEN}
           project-key: "DEV"
           create-test-cases: true
           test-framework: "junit"
-          test-results-path: "target/surefire-reports"
+          test-results-path: "target/surefire-reports/*.xml"
 
 workflows:
   build_test:
